@@ -1,0 +1,6 @@
+github.com/go-sql-driver/mysql v1.6.0 h1:BCTh4TKNUYmOmMUcQ3IipzF5prigylS7XXjEkfCHuOE=
+github.com/go-sql-driver/mysql v1.6.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
+go.neonxp.dev/jsonrpc2 v1.2.0 h1:MSelMX2i3+NiY1SD/eeUgDANmom6vU3egm1gUlqvaKY=
+go.neonxp.dev/jsonrpc2 v1.2.0/go.mod h1:xGiFcKIvOdoizfAnATCgJTyJRvLbQx9DDMd6w+7F2o0=
+golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0 h1:cu5kTvlzcw1Q5S9f5ip1/cpiB4nXvw1XYzFPGgzLUOY=
+golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=

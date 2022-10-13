@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"os"
 
@@ -17,12 +18,15 @@ var (
 	DATABASE        = os.Getenv("singlestoreDatatbase")
 	swingRepository *db.SingleStoreRepository
 )
+var (
+	ErrCannotConnectDb = errors.New("Unable to connect to database")
+)
 
 func init() {
 	connection := USERNAME + ":" + PASSWORD + "@tcp(" + HostName + ":" + Port + ")/" + DATABASE + "?parseTime=true"
 	database, err := sql.Open("mysql", connection)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer database.Close()
 
