@@ -22,6 +22,27 @@ const (
 		offset,
 		timestamp
 	)`
+	all = `
+		SELECT * FROM records ORDER BY created
+	`
+	getByFunction = `SELECT * 
+	FROM records 
+	WHERE function = ? 
+	ORDER BY created
+	LIMIT = ? 
+	`
+	getByLevel = `SELECT * 
+	FROM records
+	WHERE level = ?
+	ORDER BY created
+	LIMIT = ?
+	`
+	getByLineNum = `SELECT * 
+	FROM records
+	WHERE linenumber = ?
+	ORDER BY created
+	LIMIT = ?
+	`
 )
 
 /*

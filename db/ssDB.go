@@ -6,6 +6,8 @@ import (
 	"github.com/salemzii/swing/logs"
 )
 
+const DefaultLimit = 100
+
 type SingleStoreRepository struct {
 	db *sql.DB
 }
@@ -17,7 +19,9 @@ func NewSingleStoreRepository(db *sql.DB) *SingleStoreRepository {
 	}
 }
 
-func (repo SingleStoreRepository) GetByFunction(string) {}
+func (repo SingleStoreRepository) GetByFunction(string) {
+
+}
 
 func (repo SingleStoreRepository) GetByLevel(string) {}
 
