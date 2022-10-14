@@ -11,15 +11,17 @@ import (
 )
 
 var (
-	HostName        = os.Getenv("singlestoreDbHost")
-	Port            = os.Getenv("singlestorePort")
-	USERNAME        = os.Getenv("singlestoreUsername")
-	PASSWORD        = os.Getenv("singlestorePassword")
-	DATABASE        = os.Getenv("singlestoreDatatbase")
+	HostName           = os.Getenv("singlestoreDbHost")
+	Port               = os.Getenv("singlestorePort")
+	USERNAME           = os.Getenv("singlestoreUsername")
+	PASSWORD           = os.Getenv("singlestorePassword")
+	DATABASE           = os.Getenv("singlestoreDatatbase")
+	ErrCannotConnectDb = errors.New("unable to connect to database")
+	ErrDuplicate       = errors.New("record already exists")
+	ErrNotExists       = errors.New("row not exists")
+	ErrDeleteFailed    = errors.New("delete failed")
+
 	swingRepository *db.SingleStoreRepository
-)
-var (
-	ErrCannotConnectDb = errors.New("Unable to connect to database")
 )
 
 func init() {

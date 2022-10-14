@@ -11,4 +11,5 @@ type LogRecord struct {
 	LineNumber int       `json:"linenum"`
 	Offset     int       `json:"offset"`
 	TimeStamp  time.Time `json:"timestamp"`
+	Created    time.Time `json:"created"`
 }

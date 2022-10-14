@@ -17,14 +17,11 @@ func NewSingleStoreRepository(db *sql.DB) *SingleStoreRepository {
 	}
 }
 
-func (repo SingleStoreRepository) GetByFunction(string) {
-}
+func (repo SingleStoreRepository) GetByFunction(string) {}
 
-func (repo SingleStoreRepository) GetByLevel(string) {
-}
+func (repo SingleStoreRepository) GetByLevel(string) {}
 
-func (repo SingleStoreRepository) GetByLineNum(int) {
-}
+func (repo SingleStoreRepository) GetByLineNum(int) {}
 
 func (repo SingleStoreRepository) GetByOffset(int) {}
 func (repo SingleStoreRepository) All()            {}
@@ -32,5 +29,6 @@ func (repo SingleStoreRepository) Create(logrecord logs.LogRecord) (*logs.LogRec
 	return &logs.LogRecord{}, nil
 }
 func (repo SingleStoreRepository) Migrate() error {
+
 	return nil
 }
