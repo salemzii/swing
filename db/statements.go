@@ -13,7 +13,7 @@ const (
 		created TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
 	)`
 
-	insert = `INSERT INTO records (
+	create = `INSERT INTO records (
 		message,
 		level,
 		stacktrace,
@@ -21,27 +21,28 @@ const (
 		linenumber,
 		offset,
 		timestamp
-	)`
+	)	VALUES(?, ?, ?, ?, ?, ?, ?);`
+
 	all = `
-		SELECT * FROM records ORDER BY created
+		SELECT * FROM records ORDER BY created LIMIT = ?;
 	`
 	getByFunction = `SELECT * 
 	FROM records 
 	WHERE function = ? 
 	ORDER BY created
-	LIMIT = ? 
+	LIMIT = ?; 
 	`
 	getByLevel = `SELECT * 
 	FROM records
 	WHERE level = ?
 	ORDER BY created
-	LIMIT = ?
+	LIMIT = ?;
 	`
 	getByLineNum = `SELECT * 
 	FROM records
 	WHERE linenumber = ?
 	ORDER BY created
-	LIMIT = ?
+	LIMIT = ?;
 	`
 )
 
