@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/salemzii/swing/service"
 	"go.neonxp.dev/jsonrpc2/rpc"
 	"go.neonxp.dev/jsonrpc2/transport"
 )
@@ -17,6 +18,7 @@ func main() {
 	)
 
 	server.Register("hello", rpc.HS(Hello))
+	server.Register("all", rpc.H(service.AllRecords))
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
 	defer cancel()

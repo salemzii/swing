@@ -172,6 +172,7 @@ func (repo SingleStoreRepository) GetByOffset(offset int, limit ...int) (rcds []
 	return records, nil
 
 }
+
 func (repo SingleStoreRepository) All(limit ...int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.Prepare(all)
 	if err != nil {

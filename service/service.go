@@ -1,13 +1,16 @@
 package service
 
 import (
+	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/salemzii/swing/db"
+	"github.com/salemzii/swing/logs"
 )
 
 var (
@@ -26,6 +29,8 @@ var (
 
 func init() {
 	connection := USERNAME + ":" + PASSWORD + "@tcp(" + HostName + ":" + Port + ")/" + DATABASE + "?parseTime=true"
+	fmt.Println(connection)
+
 	database, err := sql.Open("mysql", connection)
 	if err != nil {
 		log.Fatal(err)
@@ -41,4 +46,21 @@ func init() {
 	if err := swingRepository.Migrate(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+type AllRecordStruct struct {
+	Limit int `json:"limit"`
+}
+
+func AllRecords(ctx context.Context, arg *AllRecordStruct) (rcds []logs.LogRecord, err error) {
+	if arg.Limit == 0 {
+		return nil, errors.New("limit cannot be 0")
+	}
+	records, err := swingRepository.All(arg.Limit)
+	if err != nil {
+		log.Println(err)
+		return []logs.LogRecord{}, err
+	}
+	return records, nil
+
 }
