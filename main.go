@@ -21,6 +21,9 @@ func main() {
 	server.Register("all", rpc.H(service.AllRecords))
 	server.Register("create", rpc.H(service.CreateRecord))
 	server.Register("lineno", rpc.H(service.GetRecordByNum))
+	server.Register("function", rpc.H(service.GetRecordByFunction))
+	server.Register("level", rpc.H(service.GetRecordByLevel))
+	server.Register("bulkingest", rpc.H(service.CreateRecords))
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
 	defer cancel()

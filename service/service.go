@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 
@@ -17,7 +18,7 @@ var (
 	Port     = os.Getenv("singlestorePort")
 	USERNAME = os.Getenv("singlestoreUsername")
 	PASSWORD = os.Getenv("singlestorePassword")
-	DATABASE = os.Getenv("singlestoreDatatbase")
+	DATABASE = os.Getenv("singlestoreDatabase")
 
 	ErrCannotConnectDb = errors.New("unable to connect to database")
 	ErrDuplicate       = errors.New("record already exists")
@@ -29,13 +30,14 @@ var (
 )
 
 func init() {
+
 	connection := USERNAME + ":" + PASSWORD + "@tcp(" + HostName + ":" + Port + ")/" + DATABASE + "?parseTime=true"
+	fmt.Println(connection)
 
 	database, err := sql.Open("mysql", connection)
 	if err != nil {
 		log.Fatal(err)
 	}
-	//defer database.Close()
 
 	err = database.Ping()
 	if err != nil {
@@ -46,6 +48,20 @@ func init() {
 	if err := swingRepository.Migrate(); err != nil {
 		log.Fatal(err)
 	}
+
+	/*
+		connection := USERNAME + ":" + PASSWORD + "@tcp(" + HostName + ":" + Port + ")/" + DATABASE + "?parseTime=True&loc=Local"
+
+		gormDb, err := gorm.Open(gormMySQL.Open(connection), &gorm.Config{CreateBatchSize: 1000})
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		gormRepository = db.NewGormRepository(gormDb)
+		if err = gormRepository.Migrate(); err != nil {
+			log.Fatal(err)
+		}
+	*/
 }
 
 type AllRecordStruct struct {
@@ -54,6 +70,15 @@ type AllRecordStruct struct {
 type RecordLineNum struct {
 	Limit int `json:"limit"`
 	Line  int `json:"line"`
+}
+type RecordLevel struct {
+	Level string `json:"level"`
+}
+type RecordFunction struct {
+	Function string `json:"function"`
+}
+type Record struct {
+	records []logs.LogRecord
 }
 
 func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, error) {
@@ -64,6 +89,8 @@ func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, er
 
 	return createdRecord, nil
 }
+
+func CreateRecords(ctx context.Context, arg Record) {}
 
 func AllRecords(ctx context.Context, arg *AllRecordStruct) (rcds []logs.LogRecord, err error) {
 	if arg.Limit == 0 {
@@ -79,10 +106,28 @@ func AllRecords(ctx context.Context, arg *AllRecordStruct) (rcds []logs.LogRecor
 }
 
 func GetRecordByNum(ctx context.Context, arg *RecordLineNum) (rcd []logs.LogRecord, err error) {
-	if arg.Limit == 0 {
-		return []logs.LogRecord{}, errors.New("limit cannot be 0")
-	}
+
 	record, err := swingRepository.GetByLineNum(arg.Line)
+	if err != nil {
+		log.Println("ERROR", err)
+		return []logs.LogRecord{}, err
+	}
+
+	return record, nil
+}
+
+func GetRecordByLevel(ctx context.Context, arg *RecordLevel) (rcd []logs.LogRecord, err error) {
+	record, err := swingRepository.GetByLevel(arg.Level)
+	if err != nil {
+		log.Println("ERROR", err)
+		return []logs.LogRecord{}, err
+	}
+
+	return record, nil
+}
+
+func GetRecordByFunction(ctx context.Context, arg *RecordFunction) (rcd []logs.LogRecord, err error) {
+	record, err := swingRepository.GetByFunction(arg.Function)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err

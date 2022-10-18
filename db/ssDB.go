@@ -30,14 +30,9 @@ func (repo SingleStoreRepository) GetByFunction(name string, limit ...int) (rcds
 	}
 	defer stmt.Close()
 
-	var lim int
 	var records []logs.LogRecord
 
-	if len(limit) > 0 {
-		lim = limit[0]
-	}
-
-	rows, err := stmt.Query(name, lim)
+	rows, err := stmt.Query(name)
 	if err != nil {
 		return
 	}
@@ -68,14 +63,9 @@ func (repo SingleStoreRepository) GetByLevel(level string, limit ...int) (rcds [
 	}
 	defer stmt.Close()
 
-	var lim int
 	var records []logs.LogRecord
 
-	if len(limit) > 0 {
-		lim = limit[0]
-	}
-
-	rows, err := stmt.Query(level, lim)
+	rows, err := stmt.Query(level)
 	if err != nil {
 		return
 	}
@@ -140,7 +130,7 @@ func (repo SingleStoreRepository) GetByOffset(offset int, limit ...int) (rcds []
 
 	var records []logs.LogRecord
 
-	rows, err := stmt.Query(offset, limit[0])
+	rows, err := stmt.Query(offset)
 	if err != nil {
 		return
 	}
@@ -173,7 +163,7 @@ func (repo SingleStoreRepository) All(limit ...int) (rcds []logs.LogRecord, err 
 	defer stmt.Close()
 	var records []logs.LogRecord
 
-	rows, err := stmt.QueryContext(context.Background(), limit[0])
+	rows, err := stmt.QueryContext(context.Background())
 	if err != nil {
 		return
 	}
@@ -196,6 +186,7 @@ func (repo SingleStoreRepository) All(limit ...int) (rcds []logs.LogRecord, err 
 	return records, nil
 
 }
+
 func (repo SingleStoreRepository) Create(logrecord logs.LogRecord) (*logs.LogRecord, error) {
 	res, err := repo.db.Exec(create, logrecord.Message, logrecord.Level,
 		logrecord.StackTrace, logrecord.Function, logrecord.LineNumber,
@@ -216,6 +207,11 @@ func (repo SingleStoreRepository) Create(logrecord logs.LogRecord) (*logs.LogRec
 
 	return &logrecord, nil
 }
+
+func (repo SingleStoreRepository) CreateMany(logrecords []logs.LogRecord) ([]logs.LogRecord, error) {
+	return logrecords, nil
+}
+
 func (repo SingleStoreRepository) Migrate() error {
 
 	_, err := repo.db.Exec(migrate)
