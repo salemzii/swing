@@ -9,7 +9,7 @@ const (
 		function varchar(100) NOT NULL,
 		linenumber INT NOT NULL,
 		offset INT NOT NULL,
-		timestamp TIMESTAMP(6) NOT NULL,
+		timestamp TIMESTAMP(6),
 		created TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
 	)`
 
@@ -24,7 +24,7 @@ const (
 	)	VALUES(?, ?, ?, ?, ?, ?, ?);`
 
 	all = `
-		SELECT * FROM records ORDER BY created LIMIT = ?;
+		SELECT * FROM records ORDER BY created LIMIT ?;
 	`
 	getByFunction = `SELECT * 
 	FROM records 
@@ -38,23 +38,5 @@ const (
 	ORDER BY created
 	LIMIT = ?;
 	`
-	getByLineNum = `SELECT * 
-	FROM records
-	WHERE linenumber = ?
-	ORDER BY created
-	LIMIT = ?;
-	`
+	getByLineNum = `SELECT * FROM records WHERE linenumber=? ORDER BY created;`
 )
-
-/*
-id BIGINT AUTO_INCREMENT PRIMARY KEY,
-content varchar(300) NOT NULL,
-createdate TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-INSERT INTO messages (
-content
-) VALUES (
-'starting docker container'
-);
-*/

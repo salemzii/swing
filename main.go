@@ -19,6 +19,8 @@ func main() {
 
 	server.Register("hello", rpc.HS(Hello))
 	server.Register("all", rpc.H(service.AllRecords))
+	server.Register("create", rpc.H(service.CreateRecord))
+	server.Register("lineno", rpc.H(service.GetRecordByNum))
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
 	defer cancel()

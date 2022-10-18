@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"log"
 
@@ -8,6 +9,8 @@ import (
 )
 
 const DefaultLimit = 100
+
+var ctx context.Context
 
 type SingleStoreRepository struct {
 	db *sql.DB
@@ -97,20 +100,14 @@ func (repo SingleStoreRepository) GetByLevel(level string, limit ...int) (rcds [
 }
 
 func (repo SingleStoreRepository) GetByLineNum(line int, limit ...int) (rcds []logs.LogRecord, err error) {
-	stmt, err := repo.db.Prepare(getByLineNum)
+	stmt, err := repo.db.PrepareContext(context.Background(), getByLineNum)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
 
-	var lim int
 	var records []logs.LogRecord
-
-	if len(limit) > 0 {
-		lim = limit[0]
-	}
-
-	rows, err := stmt.Query(line, lim)
+	rows, err := stmt.QueryContext(context.Background(), line)
 	if err != nil {
 		return
 	}
@@ -141,14 +138,9 @@ func (repo SingleStoreRepository) GetByOffset(offset int, limit ...int) (rcds []
 	}
 	defer stmt.Close()
 
-	var lim int
 	var records []logs.LogRecord
 
-	if len(limit) > 0 {
-		lim = limit[0]
-	}
-
-	rows, err := stmt.Query(offset, lim)
+	rows, err := stmt.Query(offset, limit[0])
 	if err != nil {
 		return
 	}
@@ -174,20 +166,14 @@ func (repo SingleStoreRepository) GetByOffset(offset int, limit ...int) (rcds []
 }
 
 func (repo SingleStoreRepository) All(limit ...int) (rcds []logs.LogRecord, err error) {
-	stmt, err := repo.db.Prepare(all)
+	stmt, err := repo.db.PrepareContext(context.Background(), all)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
-
-	lim := 100
 	var records []logs.LogRecord
 
-	if len(limit) > 0 {
-		lim = limit[0]
-	}
-
-	rows, err := stmt.Query(lim)
+	rows, err := stmt.QueryContext(context.Background(), limit[0])
 	if err != nil {
 		return
 	}
@@ -197,7 +183,7 @@ func (repo SingleStoreRepository) All(limit ...int) (rcds []logs.LogRecord, err 
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Offset, &record.TimeStamp, &record.Created)
+				&record.Offset, &record.Created, &record.TimeStamp)
 
 			if err != nil {
 				log.Fatal(err)
@@ -219,11 +205,14 @@ func (repo SingleStoreRepository) Create(logrecord logs.LogRecord) (*logs.LogRec
 		return nil, err
 	}
 
-	_, err = res.LastInsertId()
+	id, err := res.LastInsertId()
 
 	if err != nil {
 		return nil, err
 	}
+	log.Println(id)
+
+	logrecord.Id = int(id)
 
 	return &logrecord, nil
 }
