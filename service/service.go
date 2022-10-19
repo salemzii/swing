@@ -112,11 +112,12 @@ func CreateRecords(ctx context.Context, arg *Record) (uint, error) {
 	return rows, nil
 }
 
-func DeleteRecordF(ctx context.Context, arg *db.DeleteRecord) error {
-	if err := swingRepository.DeleteById(arg.Id); err != nil {
-		return err
+func DeleteRecordF(ctx context.Context, arg *db.DeleteRecord) (int, error) {
+	rows, err := swingRepository.DeleteById(arg.Id)
+	if err != nil {
+		return 0, err
 	}
-	return nil
+	return rows, nil
 }
 
 func DeleteRecordsF(ctx context.Context, arg *db.DeleteRecords) (int64, error) {

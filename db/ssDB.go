@@ -318,29 +318,29 @@ type DeleteRecords struct {
 	Ids []DeleteRecord `json:"ids"`
 }
 
-func (repo SingleStoreRepository) DeleteById(id uint64) error {
+func (repo SingleStoreRepository) DeleteById(id uint64) (int, error) {
 	stmt, err := repo.db.PrepareContext(context.Background(), delete)
 
 	if err != nil {
 		log.Printf("Error %s when preparing SQL statement", err)
-		return err
+		return 0, err
 	}
 	defer stmt.Close()
 
 	res, err := stmt.ExecContext(context.Background(), id)
 	if err != nil {
 		log.Printf("Error %s when Querying SQL ", err)
-		return err
+		return 0, err
 	}
 	rows, err := res.RowsAffected()
 	if err != nil {
 		log.Printf("Error %s when finding rows affected", err)
-		return err
+		return 0, err
 	}
 	if rows != 0 {
-		return nil
+		return int(rows), nil
 	}
-	return errors.New("zero rows affected")
+	return 0, errors.New("zero rows affected")
 }
 
 func (repo SingleStoreRepository) DeleteManyById(id []DeleteRecord) (rowsaffected int64, err error) {

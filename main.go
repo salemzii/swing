@@ -20,13 +20,15 @@ func main() {
 
 	server.Register("hello", rpc.HS(Hello))
 	server.Register("all", rpc.H(service.AllRecords))
-	server.Register("create", rpc.H(service.CreateRecord))
+	server.Register("create.one", rpc.H(service.CreateRecord))
 	server.Register("lineno", rpc.H(service.GetRecordByNum))
 	server.Register("function", rpc.H(service.GetRecordByFunction))
 	server.Register("level", rpc.H(service.GetRecordByLevel))
-	server.Register("bulkingest", rpc.H(service.CreateRecords))
+	server.Register("create.many", rpc.H(service.CreateRecords))
 	server.Register("duration.15", rpc.HS(service.GetLast15MinutesRecords))
 	server.Register("xmins", rpc.H(service.GetLastXMinutesRecords))
+	server.Register("delete.one", rpc.H(service.DeleteRecordF))
+	server.Register("delete.many", rpc.H(service.DeleteRecordsF))
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
 	defer cancel()

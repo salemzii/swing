@@ -40,6 +40,6 @@ const (
 	ORDER BY created;
 	`
 	getByLineNum = `SELECT * FROM records WHERE linenumber=? ORDER BY created;`
-	delete       = `DELETE * FROM records WHERE id=?;`
-	deleteMany   = `DELETE * FROM records WHERE id IN `
+	delete       = `DELETE FROM records WHERE id=?;`
+	deleteMany   = `DELETE FROM records WHERE id IN `
 )
