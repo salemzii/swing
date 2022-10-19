@@ -10,6 +10,7 @@ const (
 		linenumber INT NOT NULL,
 		offset INT NOT NULL,
 		timestamp TIMESTAMP(6),
+		logger varchar(100) NOT NULL,
 		created TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
 	);`
 
@@ -20,10 +21,11 @@ const (
 		function, 
 		linenumber,
 		offset,
-		timestamp
-	)	VALUES(?, ?, ?, ?, ?, ?, ?);`
+		timestamp,
+		logger
+	)	VALUES(?, ?, ?, ?, ?, ?, ?, ?);`
 
-	insertMany       = "INSERT INTO records (message, level, stacktrace, function, linenumber, offset, timestamp)	VALUES "
+	insertMany       = "INSERT INTO records (message, level, stacktrace, function, linenumber, offset, timestamp, logger)	VALUES "
 	getLast15Minutes = "SELECT * FROM records WHERE created  > DATE_SUB(NOW(), INTERVAL 15 MINUTE);"
 
 	getLastXMinutes = `SELECT * FROM records WHERE created  > DATE_SUB(NOW(), INTERVAL ? MINUTE);`

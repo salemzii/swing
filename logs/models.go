@@ -12,4 +12,5 @@ type LogRecord struct {
 	Offset     int       `json:"offset"`
 	TimeStamp  time.Time `json:"timestamp"`
 	Created    time.Time `json:"created"`
+	Logger     string    `json:"logger"`
 }

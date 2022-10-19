@@ -45,7 +45,7 @@ func (repo SingleStoreRepository) GetByFunction(name string, limit ...int) (rcds
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Offset, &record.TimeStamp, &record.Created)
+				&record.Offset, &record.TimeStamp, &record.Created, &record.Logger)
 
 			if err != nil {
 				log.Fatal(err)
@@ -78,7 +78,7 @@ func (repo SingleStoreRepository) GetByLevel(level string, limit ...int) (rcds [
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Offset, &record.TimeStamp, &record.Created)
+				&record.Offset, &record.TimeStamp, &record.Created, &record.Logger)
 
 			if err != nil {
 				log.Fatal(err)
@@ -110,7 +110,7 @@ func (repo SingleStoreRepository) GetByLineNum(line int, limit ...int) (rcds []l
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Offset, &record.TimeStamp, &record.Created)
+				&record.Offset, &record.TimeStamp, &record.Created, &record.Logger)
 
 			if err != nil {
 				log.Fatal(err)
@@ -143,7 +143,7 @@ func (repo SingleStoreRepository) GetByOffset(offset int, limit ...int) (rcds []
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Offset, &record.TimeStamp, &record.Created)
+				&record.Offset, &record.TimeStamp, &record.Created, &record.Logger)
 
 			if err != nil {
 				log.Fatal(err)
@@ -175,7 +175,7 @@ func (repo SingleStoreRepository) All(limit ...int) (rcds []logs.LogRecord, err 
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Offset, &record.Created, &record.TimeStamp)
+				&record.Offset, &record.Created, &record.TimeStamp, &record.Logger)
 
 			if err != nil {
 				log.Fatal(err)
@@ -192,7 +192,7 @@ func (repo SingleStoreRepository) All(limit ...int) (rcds []logs.LogRecord, err 
 func (repo SingleStoreRepository) Create(logrecord logs.LogRecord) (*logs.LogRecord, error) {
 	res, err := repo.db.Exec(create, logrecord.Message, logrecord.Level,
 		logrecord.StackTrace, logrecord.Function, logrecord.LineNumber,
-		logrecord.Offset, logrecord.TimeStamp)
+		logrecord.Offset, logrecord.TimeStamp, logrecord.Logger)
 
 	if err != nil {
 		return nil, err
@@ -228,7 +228,7 @@ func (repo SingleStoreRepository) Last15Minutes() (rcds []logs.LogRecord, err er
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Offset, &record.Created, &record.TimeStamp)
+				&record.Offset, &record.Created, &record.TimeStamp, &record.Logger)
 
 			if err != nil {
 				log.Fatal(err)
@@ -259,7 +259,7 @@ func (repo SingleStoreRepository) LastXMinutes(minutes int) (rcds []logs.LogReco
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Offset, &record.Created, &record.TimeStamp)
+				&record.Offset, &record.Created, &record.TimeStamp, &record.Logger)
 
 			if err != nil {
 				log.Fatal(err)
@@ -278,8 +278,8 @@ func (repo SingleStoreRepository) CreateMany(logrecords []logs.LogRecord) (uint,
 	var params []interface{}
 
 	for _, v := range logrecords {
-		inserts = append(inserts, "(?, ?, ?, ?, ?, ?, ?)")
-		params = append(params, v.Message, v.Level, v.StackTrace, v.Function, v.LineNumber, v.Offset, v.TimeStamp)
+		inserts = append(inserts, "(?, ?, ?, ?, ?, ?, ?, ?)")
+		params = append(params, v.Message, v.Level, v.StackTrace, v.Function, v.LineNumber, v.Offset, v.TimeStamp, v.Logger)
 	}
 	queryVals := strings.Join(inserts, ",")
 	query = query + queryVals
