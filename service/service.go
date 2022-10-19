@@ -95,7 +95,32 @@ func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, er
 }
 
 func CreateRecords(ctx context.Context, arg *Record) (uint, error) {
+
+	for _, v := range arg.Records {
+		switch v.Level {
+		case "ERROR":
+			// SEND ERROR MESSAGE To USER
+			// Record TO Error Analytics DB
+			//
+		}
+	}
+
 	rows, err := swingRepository.CreateMany(*&arg.Records)
+	if err != nil {
+		return 0, err
+	}
+	return rows, nil
+}
+
+func DeleteRecordF(ctx context.Context, arg *db.DeleteRecord) error {
+	if err := swingRepository.DeleteById(arg.Id); err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteRecordsF(ctx context.Context, arg *db.DeleteRecords) (int64, error) {
+	rows, err := swingRepository.DeleteManyById(arg.Ids)
 	if err != nil {
 		return 0, err
 	}
