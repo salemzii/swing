@@ -82,7 +82,7 @@ type Record struct {
 }
 
 type XRecords struct {
-	Minutes int `json:"minute"`
+	Minutes int `json:"minutes"`
 }
 
 func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, error) {

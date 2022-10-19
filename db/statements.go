@@ -26,7 +26,7 @@ const (
 	insertMany       = "INSERT INTO records (message, level, stacktrace, function, linenumber, offset, timestamp)	VALUES "
 	getLast15Minutes = "SELECT * FROM records WHERE created  > DATE_SUB(NOW(), INTERVAL 15 MINUTE);"
 
-	getLastXMinutes = "SELECT * FROM records WHERE created  >= DATE_SUB(CURDATE(), INTERVAL ? MINUTE);"
+	getLastXMinutes = `SELECT * FROM records WHERE created  > DATE_SUB(NOW(), INTERVAL ? MINUTE);`
 
 	all           = "SELECT * FROM records ORDER BY created;"
 	getByFunction = `SELECT * 
