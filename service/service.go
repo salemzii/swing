@@ -81,6 +81,10 @@ type Record struct {
 	Records []logs.LogRecord `json:"records"`
 }
 
+type XRecords struct {
+	Minutes int `json:"minute"`
+}
+
 func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, error) {
 	createdRecord, err := swingRepository.Create(*arg)
 	if err != nil {
@@ -114,6 +118,16 @@ func AllRecords(ctx context.Context, arg *AllRecordStruct) (rcds []logs.LogRecor
 func GetLast15MinutesRecords(ctx context.Context) (rcd []logs.LogRecord, err error) {
 
 	records, err := swingRepository.Last15Minutes()
+	if err != nil {
+		log.Println("ERROR", err)
+		return []logs.LogRecord{}, err
+	}
+	return records, nil
+}
+
+func GetLastXMinutesRecords(ctx context.Context, arg *XRecords) (rcd []logs.LogRecord, err error) {
+
+	records, err := swingRepository.LastXMinutes(arg.Minutes)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
