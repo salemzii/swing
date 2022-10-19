@@ -208,7 +208,7 @@ func (repo SingleStoreRepository) Create(logrecord logs.LogRecord) (*logs.LogRec
 	return &logrecord, nil
 }
 
-func (repo SingleStoreRepository) CreateMany(logrecords []logs.LogRecord) ([]logs.LogRecord, error) {
+func (repo SingleStoreRepository) CreateMany(logrecords []logs.LogRecord) (uint, error) {
 	query := insertMany
 	var inserts []string
 	var params []interface{}
@@ -228,21 +228,21 @@ func (repo SingleStoreRepository) CreateMany(logrecords []logs.LogRecord) ([]log
 		stmt, err := repo.db.PrepareContext(ctx, query)
 		if err != nil {
 			log.Printf("Error %s when preparing SQL statement", err)
-			return []logs.LogRecord{}, err
+			return 0, err
 		}
 		defer stmt.Close()
 		res, err := stmt.ExecContext(ctx, params...)
 		if err != nil {
 			log.Printf("Error %s when inserting row into products table", err)
-			return []logs.LogRecord{}, err
+			return 0, err
 		}
 		rows, err := res.RowsAffected()
 		if err != nil {
 			log.Printf("Error %s when finding rows affected", err)
-			return []logs.LogRecord{}, err
+			return 0, err
 		}
 		log.Printf("%d products created simulatneously", rows)
-		return []logs.LogRecord{}, err
+		return uint(rows), err
 	}
 }
 

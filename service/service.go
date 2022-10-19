@@ -78,7 +78,7 @@ type RecordFunction struct {
 	Function string `json:"function"`
 }
 type Record struct {
-	Records []logs.LogRecord
+	Records []logs.LogRecord `json:"records"`
 }
 
 func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, error) {
@@ -91,7 +91,11 @@ func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, er
 }
 
 func CreateRecords(ctx context.Context, arg *Record) (uint, error) {
-	return 0, nil
+	rows, err := swingRepository.CreateMany(*&arg.Records)
+	if err != nil {
+		return 0, err
+	}
+	return rows, nil
 }
 
 func AllRecords(ctx context.Context, arg *AllRecordStruct) (rcds []logs.LogRecord, err error) {
