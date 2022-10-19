@@ -78,7 +78,7 @@ type RecordFunction struct {
 	Function string `json:"function"`
 }
 type Record struct {
-	records []logs.LogRecord
+	Records []logs.LogRecord
 }
 
 func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, error) {
@@ -90,7 +90,9 @@ func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, er
 	return createdRecord, nil
 }
 
-func CreateRecords(ctx context.Context, arg Record) {}
+func CreateRecords(ctx context.Context, arg *Record) (uint, error) {
+	return 0, nil
+}
 
 func AllRecords(ctx context.Context, arg *AllRecordStruct) (rcds []logs.LogRecord, err error) {
 	if arg.Limit == 0 {

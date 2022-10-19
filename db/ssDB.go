@@ -4,13 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"strings"
+	"time"
 
 	"github.com/salemzii/swing/logs"
 )
 
 const DefaultLimit = 100
-
-var ctx context.Context
 
 type SingleStoreRepository struct {
 	db *sql.DB
@@ -209,7 +209,41 @@ func (repo SingleStoreRepository) Create(logrecord logs.LogRecord) (*logs.LogRec
 }
 
 func (repo SingleStoreRepository) CreateMany(logrecords []logs.LogRecord) ([]logs.LogRecord, error) {
-	return logrecords, nil
+	query := insertMany
+	var inserts []string
+	var params []interface{}
+
+	for _, v := range logrecords {
+		inserts = append(inserts, "(?, ?, ?, ?, ?, ?, ?)")
+		params = append(params, v.Message, v.Level, v.StackTrace, v.Function, v.LineNumber, v.Offset, v.TimeStamp)
+	}
+	queryVals := strings.Join(inserts, ",")
+	query = query + queryVals
+	log.Println("query is", query)
+
+	{
+
+		ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancelfunc()
+		stmt, err := repo.db.PrepareContext(ctx, query)
+		if err != nil {
+			log.Printf("Error %s when preparing SQL statement", err)
+			return []logs.LogRecord{}, err
+		}
+		defer stmt.Close()
+		res, err := stmt.ExecContext(ctx, params...)
+		if err != nil {
+			log.Printf("Error %s when inserting row into products table", err)
+			return []logs.LogRecord{}, err
+		}
+		rows, err := res.RowsAffected()
+		if err != nil {
+			log.Printf("Error %s when finding rows affected", err)
+			return []logs.LogRecord{}, err
+		}
+		log.Printf("%d products created simulatneously", rows)
+		return []logs.LogRecord{}, err
+	}
 }
 
 func (repo SingleStoreRepository) Migrate() error {

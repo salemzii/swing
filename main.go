@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+
 	server := rpc.New(
 		rpc.WithLogger(rpc.StdLogger),
 		rpc.WithTransport(&transport.HTTP{Bind: ":8080"}),
