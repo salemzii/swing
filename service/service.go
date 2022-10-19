@@ -26,7 +26,6 @@ var (
 	ErrDeleteFailed    = errors.New("delete failed")
 
 	swingRepository *db.SingleStoreRepository
-	gormRepository  *db.GormRepository
 )
 
 func init() {
@@ -44,24 +43,12 @@ func init() {
 		panic(err)
 	}
 
+	database.SetMaxIdleConns(20)
 	swingRepository = db.NewSingleStoreRepository(database)
 	if err := swingRepository.Migrate(); err != nil {
 		log.Fatal(err)
 	}
 
-	/*
-		connection := USERNAME + ":" + PASSWORD + "@tcp(" + HostName + ":" + Port + ")/" + DATABASE + "?parseTime=True&loc=Local"
-
-		gormDb, err := gorm.Open(gormMySQL.Open(connection), &gorm.Config{CreateBatchSize: 1000})
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		gormRepository = db.NewGormRepository(gormDb)
-		if err = gormRepository.Migrate(); err != nil {
-			log.Fatal(err)
-		}
-	*/
 }
 
 type AllRecordStruct struct {
