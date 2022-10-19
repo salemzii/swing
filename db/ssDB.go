@@ -208,6 +208,37 @@ func (repo SingleStoreRepository) Create(logrecord logs.LogRecord) (*logs.LogRec
 	return &logrecord, nil
 }
 
+func (repo SingleStoreRepository) Last15Minutes() (rcds []logs.LogRecord, err error) {
+	stmt, err := repo.db.PrepareContext(context.Background(), getLast15Minutes)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+	var records []logs.LogRecord
+
+	rows, err := stmt.QueryContext(context.Background())
+	if err != nil {
+		return
+	}
+	{
+
+		for rows.Next() {
+			var record logs.LogRecord
+			err := rows.Scan(&record.Id, &record.Level, &record.Message,
+				&record.StackTrace, &record.Function, &record.LineNumber,
+				&record.Offset, &record.Created, &record.TimeStamp)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+			records = append(records, record)
+
+		}
+	}
+
+	return records, nil
+}
+
 func (repo SingleStoreRepository) CreateMany(logrecords []logs.LogRecord) (uint, error) {
 	query := insertMany
 	var inserts []string

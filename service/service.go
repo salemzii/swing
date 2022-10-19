@@ -111,6 +111,16 @@ func AllRecords(ctx context.Context, arg *AllRecordStruct) (rcds []logs.LogRecor
 
 }
 
+func GetLast15MinutesRecords(ctx context.Context) (rcd []logs.LogRecord, err error) {
+
+	records, err := swingRepository.Last15Minutes()
+	if err != nil {
+		log.Println("ERROR", err)
+		return []logs.LogRecord{}, err
+	}
+	return records, nil
+}
+
 func GetRecordByNum(ctx context.Context, arg *RecordLineNum) (rcd []logs.LogRecord, err error) {
 
 	record, err := swingRepository.GetByLineNum(arg.Line)
