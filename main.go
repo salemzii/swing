@@ -25,7 +25,7 @@ func main() {
 	server.Register("function", rpc.H(service.GetRecordByFunction))
 	server.Register("level", rpc.H(service.GetRecordByLevel))
 	server.Register("bulkingest", rpc.H(service.CreateRecords))
-	server.Register("15", rpc.HS(service.GetLast15MinutesRecords))
+	server.Register("duration.15", rpc.HS(service.GetLast15MinutesRecords))
 	server.Register("xmins", rpc.H(service.GetLastXMinutesRecords))
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
