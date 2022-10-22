@@ -1,10 +1,11 @@
 package users
 
-import "gorm.io/gorm"
+import "github.com/google/uuid"
 
 type User struct {
-	gorm.Model
-	Username string
-	Password string
-	Email    string
+	Id           uuid.UUID     `json:"id"`
+	Username     string        `json:"username"`
+	Password     string        `json:"password"`
+	Email        string        `json:"email"`
+	Applications []Application `json:"applications"`
 }

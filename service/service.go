@@ -73,6 +73,7 @@ type XRecords struct {
 }
 
 func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, error) {
+	log.Println(arg)
 	createdRecord, err := swingRepository.Create(*arg)
 	if err != nil {
 		return &logs.LogRecord{}, err
@@ -84,6 +85,7 @@ func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, er
 func CreateRecords(ctx context.Context, arg *Record) (uint, error) {
 
 	for _, v := range arg.Records {
+		log.Println(v)
 		switch v.Level {
 		case "ERROR":
 			// SEND ERROR MESSAGE To USER
