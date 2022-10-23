@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"log"
+	"time"
 
 	"github.com/salemzii/swing/service"
 	"go.neonxp.dev/jsonrpc2/rpc"
@@ -31,19 +32,19 @@ func TokenMiddleware(ctx context.Context) rpc.Middleware {
 			if err := json.Unmarshal(req.Params, &tokenObj); err != nil {
 				return resp
 			}
-			log.Println("The token is::: " + string(tokenObj.Token))
+			log.Println(string(tokenObj.Token))
 
 			details, err := service.VerifyToken(string(tokenObj.Token))
 			if err != nil {
-				return resp
+				return &rpc.RpcResponse{Jsonrpc: "2.0", Result: json.RawMessage(err.Error()), Error: err}
 			}
 
 			if !details.Enabled {
-				return resp
+				return &rpc.RpcResponse{Jsonrpc: "2.0", Result: json.RawMessage(ErrTokenInActive.Error()), Error: ErrTokenInActive}
 			}
 
-			if !details.active {
-
+			if details.Expires_at.Before(time.Now()) {
+				return &rpc.RpcResponse{Jsonrpc: "2.0", Result: json.RawMessage(ErrTokenExpired.Error()), Error: ErrTokenExpired}
 			}
 
 			return resp

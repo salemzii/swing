@@ -364,12 +364,3 @@ func (repo SingleStoreRepository) DeleteManyById(id []DeleteRecord) (rowsaffecte
 	}
 	return 0, errors.New("zero rows affected")
 }
-
-func (repo SingleStoreRepository) Migrate() error {
-
-	_, err := repo.db.Exec(migrate)
-	if err != nil {
-		return err
-	}
-	return nil
-}

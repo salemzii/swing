@@ -1,11 +1,11 @@
 package users
 
-import "github.com/google/uuid"
+import "time"
 
 type User struct {
-	Id           uuid.UUID     `json:"id"`
-	Username     string        `json:"username"`
-	Password     string        `json:"password"`
-	Email        string        `json:"email"`
-	Applications []Application `json:"applications"`
+	Id       int       `json:"id"`
+	Username string    `json:"username"`
+	Email    string    `json:"email"`
+	Password string    `json:"password"`
+	Created  time.Time `json:"created"`
 }

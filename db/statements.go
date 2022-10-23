@@ -45,5 +45,23 @@ const (
 	delete       = `DELETE FROM records WHERE id=?;`
 	deleteMany   = `DELETE FROM records WHERE id IN `
 
-	GetToken = "SELECT FROM application_tokens WHERE token = ?"
+	GetToken    = "SELECT FROM tokens WHERE token = ?"
+	migrateUser = `CREATE TABLE IF NOT EXISTS users (
+		id BIGINT AUTO_INCREMENT PRIMARY KEY,
+		username VARCHAR(50) NOT NULL,
+		email VARCHAR(50)	NOT NULL,
+		password VARCHAR(50) NOT NULL,
+		created TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+	`
+	migrateToken = `CREATE TABLE IF NOT EXISTS tokens (
+		id BIGINT AUTO_INCREMENT PRIMARY KEY,
+		token VARCHAR(20) NOT NULL, 
+		expires TIMESTAMP(6) NOT NULL,
+		rate INT NOT NULL,
+		enabled BOOLEAN NOT NULL,
+		created TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		userid BIGINT UNIQUE FOREIGN KEY REFERENCES users(id)
+	);
+	`
 )
