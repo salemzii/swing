@@ -7,6 +7,7 @@ import (
 	"os/signal"
 
 	"github.com/salemzii/swing/service"
+	"github.com/salemzii/swing/users"
 	"go.neonxp.dev/jsonrpc2/rpc"
 	"go.neonxp.dev/jsonrpc2/transport"
 )
@@ -16,6 +17,7 @@ func main() {
 	server := rpc.New(
 		rpc.WithLogger(rpc.StdLogger),
 		rpc.WithTransport(&transport.HTTP{Bind: ":8080"}),
+		rpc.WithMiddleware(users.TokenMiddleware(context.Background())),
 	)
 
 	server.Register("rpc.hello", rpc.HS(Hello))

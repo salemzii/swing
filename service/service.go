@@ -11,6 +11,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/salemzii/swing/db"
 	"github.com/salemzii/swing/logs"
+	"github.com/salemzii/swing/users"
 )
 
 var (
@@ -25,7 +26,7 @@ var (
 	ErrNotExists       = errors.New("row not exists")
 	ErrDeleteFailed    = errors.New("delete failed")
 
-	swingRepository *db.SingleStoreRepository
+	SwingRepository *db.SingleStoreRepository
 )
 
 func init() {
@@ -44,8 +45,8 @@ func init() {
 	}
 
 	database.SetMaxIdleConns(20)
-	swingRepository = db.NewSingleStoreRepository(database)
-	if err := swingRepository.Migrate(); err != nil {
+	SwingRepository = db.NewSingleStoreRepository(database)
+	if err := SwingRepository.Migrate(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -74,7 +75,7 @@ type XRecords struct {
 
 func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, error) {
 	log.Println(arg)
-	createdRecord, err := swingRepository.Create(*arg)
+	createdRecord, err := SwingRepository.Create(*arg)
 	if err != nil {
 		return &logs.LogRecord{}, err
 	}
@@ -94,7 +95,7 @@ func CreateRecords(ctx context.Context, arg *Record) (uint, error) {
 		}
 	}
 
-	rows, err := swingRepository.CreateMany(*&arg.Records)
+	rows, err := SwingRepository.CreateMany(*&arg.Records)
 	if err != nil {
 		return 0, err
 	}
@@ -102,7 +103,7 @@ func CreateRecords(ctx context.Context, arg *Record) (uint, error) {
 }
 
 func DeleteRecordF(ctx context.Context, arg *db.DeleteRecord) (int, error) {
-	rows, err := swingRepository.DeleteById(arg.Id)
+	rows, err := SwingRepository.DeleteById(arg.Id)
 	if err != nil {
 		return 0, err
 	}
@@ -110,7 +111,7 @@ func DeleteRecordF(ctx context.Context, arg *db.DeleteRecord) (int, error) {
 }
 
 func DeleteRecordsF(ctx context.Context, arg *db.DeleteRecords) (int64, error) {
-	rows, err := swingRepository.DeleteManyById(arg.Ids)
+	rows, err := SwingRepository.DeleteManyById(arg.Ids)
 	if err != nil {
 		return 0, err
 	}
@@ -121,7 +122,7 @@ func AllRecords(ctx context.Context, arg *AllRecordStruct) (rcds []logs.LogRecor
 	if arg.Limit == 0 {
 		return nil, errors.New("limit cannot be 0")
 	}
-	records, err := swingRepository.All(arg.Limit)
+	records, err := SwingRepository.All(arg.Limit)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
@@ -132,7 +133,7 @@ func AllRecords(ctx context.Context, arg *AllRecordStruct) (rcds []logs.LogRecor
 
 func GetLast15MinutesRecords(ctx context.Context) (rcd []logs.LogRecord, err error) {
 
-	records, err := swingRepository.Last15Minutes()
+	records, err := SwingRepository.Last15Minutes()
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
@@ -142,7 +143,7 @@ func GetLast15MinutesRecords(ctx context.Context) (rcd []logs.LogRecord, err err
 
 func GetLastXMinutesRecords(ctx context.Context, arg *XRecords) (rcd []logs.LogRecord, err error) {
 
-	records, err := swingRepository.LastXMinutes(arg.Minutes)
+	records, err := SwingRepository.LastXMinutes(arg.Minutes)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
@@ -152,7 +153,7 @@ func GetLastXMinutesRecords(ctx context.Context, arg *XRecords) (rcd []logs.LogR
 
 func GetRecordByNum(ctx context.Context, arg *RecordLineNum) (rcd []logs.LogRecord, err error) {
 
-	record, err := swingRepository.GetByLineNum(arg.Line)
+	record, err := SwingRepository.GetByLineNum(arg.Line)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
@@ -162,7 +163,7 @@ func GetRecordByNum(ctx context.Context, arg *RecordLineNum) (rcd []logs.LogReco
 }
 
 func GetRecordByLevel(ctx context.Context, arg *RecordLevel) (rcd []logs.LogRecord, err error) {
-	record, err := swingRepository.GetByLevel(arg.Level)
+	record, err := SwingRepository.GetByLevel(arg.Level)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
@@ -172,11 +173,20 @@ func GetRecordByLevel(ctx context.Context, arg *RecordLevel) (rcd []logs.LogReco
 }
 
 func GetRecordByFunction(ctx context.Context, arg *RecordFunction) (rcd []logs.LogRecord, err error) {
-	record, err := swingRepository.GetByFunction(arg.Function)
+	record, err := SwingRepository.GetByFunction(arg.Function)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
 	}
 
 	return record, nil
+}
+
+func VerifyToken(token string) (users.TokenDetails, error) {
+	details, err := SwingRepository.FetchToken(token)
+	if err != nil {
+		log.Println("ERROR", err)
+		return users.TokenDetails{}, err
+	}
+	return details, nil
 }

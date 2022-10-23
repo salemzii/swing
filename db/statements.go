@@ -44,4 +44,6 @@ const (
 	getByLineNum = `SELECT * FROM records WHERE linenumber=? ORDER BY created;`
 	delete       = `DELETE FROM records WHERE id=?;`
 	deleteMany   = `DELETE FROM records WHERE id IN `
+
+	GetToken = "SELECT FROM application_tokens WHERE token = ?"
 )

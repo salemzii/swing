@@ -10,7 +10,7 @@ import (
 type Application struct {
 	Id       uuid.UUID        `json:"id"`
 	Name     string           `json:"name"`
-	AppToken tokenDetails     `json:"apptoken"`
+	AppToken TokenDetails     `json:"apptoken"`
 	UserId   uuid.UUID        `json:"userid"`
 	Active   bool             `json:"active"`
 	Created  time.Time        `json:"created"`
@@ -18,7 +18,8 @@ type Application struct {
 	Records  []logs.LogRecord `json:"records"`
 }
 
-type tokenDetails struct {
+type TokenDetails struct {
+	Id         uuid.UUID `json:"id"`
 	Token      string    `json:"token"`
 	Expires_at time.Time `json:"expires"`
 	Rate_limit int       `json:"rate_limit"`
