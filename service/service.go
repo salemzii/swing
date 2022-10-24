@@ -53,16 +53,20 @@ func init() {
 }
 
 type AllRecordStruct struct {
-	Limit int `json:"limit"`
+	Tokenid string `json:"tokenid"`
+	Limit   int    `json:"limit"`
 }
 type RecordLineNum struct {
-	Limit int `json:"limit"`
-	Line  int `json:"line"`
+	Tokenid string `json:"tokenid"`
+	Limit   int    `json:"limit"`
+	Line    int    `json:"line"`
 }
 type RecordLevel struct {
-	Level string `json:"level"`
+	Tokenid string `json:"tokenid"`
+	Level   string `json:"level"`
 }
 type RecordFunction struct {
+	Tokenid  string `json:"tokenid"`
 	Function string `json:"function"`
 }
 type Record struct {
@@ -70,7 +74,8 @@ type Record struct {
 }
 
 type XRecords struct {
-	Minutes int `json:"minutes"`
+	Tokenid string `json:"tokenid"`
+	Minutes int    `json:"minutes"`
 }
 
 func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, error) {
@@ -103,7 +108,7 @@ func CreateRecords(ctx context.Context, arg *Record) (uint, error) {
 }
 
 func DeleteRecordF(ctx context.Context, arg *db.DeleteRecord) (int, error) {
-	rows, err := SwingRepository.DeleteById(arg.Id)
+	rows, err := SwingRepository.DeleteById(arg.Tokenid, arg.Id)
 	if err != nil {
 		return 0, err
 	}
@@ -111,7 +116,7 @@ func DeleteRecordF(ctx context.Context, arg *db.DeleteRecord) (int, error) {
 }
 
 func DeleteRecordsF(ctx context.Context, arg *db.DeleteRecords) (int64, error) {
-	rows, err := SwingRepository.DeleteManyById(arg.Ids)
+	rows, err := SwingRepository.DeleteManyById(arg.Tokenid, arg.Ids)
 	if err != nil {
 		return 0, err
 	}
@@ -122,7 +127,7 @@ func AllRecords(ctx context.Context, arg *AllRecordStruct) (rcds []logs.LogRecor
 	if arg.Limit == 0 {
 		return nil, errors.New("limit cannot be 0")
 	}
-	records, err := SwingRepository.All(arg.Limit)
+	records, err := SwingRepository.All(arg.Tokenid, arg.Limit)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
@@ -131,9 +136,8 @@ func AllRecords(ctx context.Context, arg *AllRecordStruct) (rcds []logs.LogRecor
 
 }
 
-func GetLast15MinutesRecords(ctx context.Context) (rcd []logs.LogRecord, err error) {
-
-	records, err := SwingRepository.Last15Minutes()
+func GetLast15MinutesRecords(ctx context.Context, arg *XRecords) (rcd []logs.LogRecord, err error) {
+	records, err := SwingRepository.Last15Minutes(arg.Tokenid)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
@@ -143,7 +147,7 @@ func GetLast15MinutesRecords(ctx context.Context) (rcd []logs.LogRecord, err err
 
 func GetLastXMinutesRecords(ctx context.Context, arg *XRecords) (rcd []logs.LogRecord, err error) {
 
-	records, err := SwingRepository.LastXMinutes(arg.Minutes)
+	records, err := SwingRepository.LastXMinutes(arg.Tokenid, arg.Minutes)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
@@ -153,7 +157,7 @@ func GetLastXMinutesRecords(ctx context.Context, arg *XRecords) (rcd []logs.LogR
 
 func GetRecordByNum(ctx context.Context, arg *RecordLineNum) (rcd []logs.LogRecord, err error) {
 
-	record, err := SwingRepository.GetByLineNum(arg.Line)
+	record, err := SwingRepository.GetByLineNum(arg.Line, arg.Tokenid)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
@@ -163,7 +167,7 @@ func GetRecordByNum(ctx context.Context, arg *RecordLineNum) (rcd []logs.LogReco
 }
 
 func GetRecordByLevel(ctx context.Context, arg *RecordLevel) (rcd []logs.LogRecord, err error) {
-	record, err := SwingRepository.GetByLevel(arg.Level)
+	record, err := SwingRepository.GetByLevel(arg.Level, arg.Tokenid)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
@@ -173,13 +177,26 @@ func GetRecordByLevel(ctx context.Context, arg *RecordLevel) (rcd []logs.LogReco
 }
 
 func GetRecordByFunction(ctx context.Context, arg *RecordFunction) (rcd []logs.LogRecord, err error) {
-	record, err := SwingRepository.GetByFunction(arg.Function)
+	record, err := SwingRepository.GetByFunction(arg.Function, arg.Tokenid)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
 	}
 
 	return record, nil
+}
+
+func CreateUserAccount(ctx context.Context, arg *users.User) (*users.User, error) {
+	user, err := SwingRepository.CreateUser(*arg)
+
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func LoginUserAccount(ctx context.Context, arg *users.LoginUser) (*users.User, error) {
+	return &users.User{}, nil
 }
 
 func VerifyToken(token string) (users.TokenDetails, error) {

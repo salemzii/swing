@@ -11,6 +11,8 @@ const (
 		process INT NOT NULL,
 		timestamp TIMESTAMP(6),
 		logger varchar(100) NOT NULL,
+		tokenid varchar(50) NOT NULL,
+		userid INT NOT NULL,
 		created TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
 	);`
 
@@ -22,46 +24,65 @@ const (
 		linenumber,
 		process,
 		timestamp,
-		logger
-	)	VALUES(?, ?, ?, ?, ?, ?, ?, ?);`
+		logger,
+		userid
+	)	VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
-	insertMany       = "INSERT INTO records (message, level, stacktrace, function, linenumber, process, timestamp, logger)	VALUES "
-	getLast15Minutes = "SELECT * FROM records WHERE created  > DATE_SUB(NOW(), INTERVAL 15 MINUTE);"
+	insertMany       = "INSERT INTO records (message, level, stacktrace, function, linenumber, process, timestamp, logger, userid)	VALUES "
+	getLast15Minutes = `SELECT * FROM records WHERE userid=? AND  created  > DATE_SUB(NOW(), INTERVAL 15 MINUTE) ORDER BY created 
+	RETURNING id, level, message, stacktrace, function, linenumber, process, timestamp, created, logger, userid;`
 
 	getLastXMinutes = `SELECT * FROM records WHERE created  > DATE_SUB(NOW(), INTERVAL ? MINUTE);`
 
-	all           = "SELECT * FROM records ORDER BY created;"
+	all = `SELECT * FROM records WHERE userid=? ORDER BY created 
+		RETURNING id, level, message, stacktrace, function, linenumber, process, timestamp, created, logger, userid;`
 	getByFunction = `SELECT * 
 	FROM records 
-	WHERE function=? 
-	ORDER BY created; 
+	WHERE userid=? AND function=? 
+	ORDER BY created
+	RETURNING id, level, message, stacktrace, function, linenumber, process, timestamp, created, logger, userid; 
 	`
 	getByLevel = `SELECT * 
 	FROM records
-	WHERE level=?
-	ORDER BY created;
+	WHERE userid=? AND level=?
+	ORDER BY created
+	RETURNING id, level, message, stacktrace, function, linenumber, process, timestamp, created, logger, userid;
 	`
-	getByLineNum = `SELECT * FROM records WHERE linenumber=? ORDER BY created;`
-	delete       = `DELETE FROM records WHERE id=?;`
-	deleteMany   = `DELETE FROM records WHERE id IN `
+	getByLineNum = `SELECT * 
+	FROM records 
+	WHERE userid=? AND linenumber=? 
+	ORDER BY created
+	RETURNING id, level, message, stacktrace, function, linenumber, process, timestamp, created, logger, userid;
+	`
+	delete     = `DELETE FROM records WHERE userid=? AND id=?;`
+	deleteMany = `DELETE FROM records WHERE userid=? AND id IN `
 
-	GetToken    = "SELECT FROM tokens WHERE token = ?"
 	migrateUser = `CREATE TABLE IF NOT EXISTS users (
 		id BIGINT AUTO_INCREMENT PRIMARY KEY,
 		username VARCHAR(50) NOT NULL,
 		email VARCHAR(50)	NOT NULL,
 		password VARCHAR(50) NOT NULL,
 		created TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
-	);
-	`
+	);`
+	createUser = `INSERT INTO users (
+		username, 
+		email, 
+		password
+	) VALUES (?, ?, ?);`
+
+	allUsers          = `SELECT * FROM users ORDER BY created;`
+	getUserByEmail    = `SELECT FROM users WHERE email=?;`
+	getUserByUsername = `SELECT * FROM users WHERE username=?;`
+
 	migrateToken = `CREATE TABLE IF NOT EXISTS tokens (
 		id BIGINT AUTO_INCREMENT PRIMARY KEY,
 		token VARCHAR(20) NOT NULL, 
 		expires TIMESTAMP(6) NOT NULL,
 		rate INT NOT NULL,
 		enabled BOOLEAN NOT NULL,
-		created TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		userid BIGINT UNIQUE FOREIGN KEY REFERENCES users(id)
-	);
-	`
+		userid INT NOT NULL,
+		created TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);`
+	getToken         = "SELECT * FROM tokens WHERE token = ?;"
+	getTokenByUserId = `SELECT * FROM tokens WHERE userid=? RETURNING token;`
 )

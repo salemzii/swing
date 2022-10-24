@@ -9,3 +9,8 @@ type User struct {
 	Password string    `json:"password"`
 	Created  time.Time `json:"created"`
 }
+
+type LoginUser struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}

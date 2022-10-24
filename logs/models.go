@@ -13,4 +13,6 @@ type LogRecord struct {
 	TimeStamp  time.Time `json:"timestamp"`
 	Created    time.Time `json:"created"`
 	Logger     string    `json:"logger"`
+	TokenId    string    `json:"tokenid"`
+	UserId     int       `json:"userid"`
 }

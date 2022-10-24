@@ -11,7 +11,7 @@ import (
 	"github.com/salemzii/swing/logs"
 )
 
-func (repo SingleStoreRepository) GetByFunction(name string, limit ...int) (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) GetByFunction(name string, tokenid string, limit ...int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.Prepare(getByFunction)
 	if err != nil {
 		return
@@ -31,7 +31,7 @@ func (repo SingleStoreRepository) GetByFunction(name string, limit ...int) (rcds
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Process, &record.TimeStamp, &record.Created, &record.Logger)
+				&record.Process, &record.TimeStamp, &record.Created, &record.Logger, &record.UserId)
 
 			if err != nil {
 				log.Fatal(err)
@@ -44,7 +44,7 @@ func (repo SingleStoreRepository) GetByFunction(name string, limit ...int) (rcds
 	return records, nil
 }
 
-func (repo SingleStoreRepository) GetByLevel(level string, limit ...int) (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) GetByLevel(level string, tokenid string, limit ...int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.Prepare(getByLevel)
 	if err != nil {
 		return
@@ -64,7 +64,7 @@ func (repo SingleStoreRepository) GetByLevel(level string, limit ...int) (rcds [
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Process, &record.TimeStamp, &record.Created, &record.Logger)
+				&record.Process, &record.TimeStamp, &record.Created, &record.Logger, &record.UserId)
 
 			if err != nil {
 				log.Fatal(err)
@@ -77,7 +77,7 @@ func (repo SingleStoreRepository) GetByLevel(level string, limit ...int) (rcds [
 	return records, nil
 }
 
-func (repo SingleStoreRepository) GetByLineNum(line int, limit ...int) (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) GetByLineNum(line int, tokenid string, limit ...int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.PrepareContext(context.Background(), getByLineNum)
 	if err != nil {
 		return
@@ -96,7 +96,7 @@ func (repo SingleStoreRepository) GetByLineNum(line int, limit ...int) (rcds []l
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Process, &record.TimeStamp, &record.Created, &record.Logger)
+				&record.Process, &record.TimeStamp, &record.Created, &record.Logger, &record.UserId)
 
 			if err != nil {
 				log.Fatal(err)
@@ -109,7 +109,7 @@ func (repo SingleStoreRepository) GetByLineNum(line int, limit ...int) (rcds []l
 	return records, nil
 }
 
-func (repo SingleStoreRepository) GetByOffset(offset int, limit ...int) (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) GetByOffset(offset int, tokenid string, limit ...int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.Prepare(getByLineNum)
 	if err != nil {
 		return
@@ -129,7 +129,7 @@ func (repo SingleStoreRepository) GetByOffset(offset int, limit ...int) (rcds []
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Process, &record.TimeStamp, &record.Created, &record.Logger)
+				&record.Process, &record.TimeStamp, &record.Created, &record.Logger, &record.UserId)
 
 			if err != nil {
 				log.Fatal(err)
@@ -143,7 +143,7 @@ func (repo SingleStoreRepository) GetByOffset(offset int, limit ...int) (rcds []
 
 }
 
-func (repo SingleStoreRepository) All(limit ...int) (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) All(tokenid string, limit ...int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.PrepareContext(context.Background(), all)
 	if err != nil {
 		return
@@ -161,7 +161,7 @@ func (repo SingleStoreRepository) All(limit ...int) (rcds []logs.LogRecord, err 
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Process, &record.Created, &record.TimeStamp, &record.Logger)
+				&record.Process, &record.Created, &record.TimeStamp, &record.Logger, &record.UserId)
 
 			if err != nil {
 				log.Fatal(err)
@@ -178,7 +178,7 @@ func (repo SingleStoreRepository) All(limit ...int) (rcds []logs.LogRecord, err 
 func (repo SingleStoreRepository) Create(logrecord logs.LogRecord) (*logs.LogRecord, error) {
 	res, err := repo.db.Exec(create, logrecord.Message, logrecord.Level,
 		logrecord.StackTrace, logrecord.Function, logrecord.LineNumber,
-		logrecord.Process, logrecord.TimeStamp, logrecord.Logger)
+		logrecord.Process, logrecord.TimeStamp, logrecord.Logger, logrecord.UserId)
 
 	if err != nil {
 		return nil, err
@@ -196,7 +196,7 @@ func (repo SingleStoreRepository) Create(logrecord logs.LogRecord) (*logs.LogRec
 	return &logrecord, nil
 }
 
-func (repo SingleStoreRepository) Last15Minutes() (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) Last15Minutes(tokenid string) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.PrepareContext(context.Background(), getLast15Minutes)
 	if err != nil {
 		return
@@ -214,7 +214,7 @@ func (repo SingleStoreRepository) Last15Minutes() (rcds []logs.LogRecord, err er
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Process, &record.Created, &record.TimeStamp, &record.Logger)
+				&record.Process, &record.Created, &record.TimeStamp, &record.Logger, &record.UserId)
 
 			if err != nil {
 				log.Fatal(err)
@@ -227,7 +227,7 @@ func (repo SingleStoreRepository) Last15Minutes() (rcds []logs.LogRecord, err er
 	return records, nil
 }
 
-func (repo SingleStoreRepository) LastXMinutes(minutes int) (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) LastXMinutes(tokenid string, minutes int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.PrepareContext(context.Background(), getLastXMinutes)
 	if err != nil {
 		return
@@ -245,7 +245,7 @@ func (repo SingleStoreRepository) LastXMinutes(minutes int) (rcds []logs.LogReco
 			var record logs.LogRecord
 			err := rows.Scan(&record.Id, &record.Level, &record.Message,
 				&record.StackTrace, &record.Function, &record.LineNumber,
-				&record.Process, &record.Created, &record.TimeStamp, &record.Logger)
+				&record.Process, &record.Created, &record.TimeStamp, &record.Logger, &record.UserId)
 
 			if err != nil {
 				log.Fatal(err)
@@ -265,7 +265,7 @@ func (repo SingleStoreRepository) CreateMany(logrecords []logs.LogRecord) (uint,
 
 	for _, v := range logrecords {
 		inserts = append(inserts, "(?, ?, ?, ?, ?, ?, ?, ?)")
-		params = append(params, v.Message, v.Level, v.StackTrace, v.Function, v.LineNumber, v.Process, v.TimeStamp, v.Logger)
+		params = append(params, v.Message, v.Level, v.StackTrace, v.Function, v.LineNumber, v.Process, v.TimeStamp, v.Logger, v.UserId)
 	}
 	queryVals := strings.Join(inserts, ",")
 	query = query + queryVals
@@ -298,14 +298,16 @@ func (repo SingleStoreRepository) CreateMany(logrecords []logs.LogRecord) (uint,
 }
 
 type DeleteRecord struct {
-	Id uint64 `json:"id"`
+	Tokenid string `json:"tokenid"`
+	Id      uint64 `json:"id"`
 }
 
 type DeleteRecords struct {
-	Ids []DeleteRecord `json:"ids"`
+	Tokenid string         `json:"tokenid"`
+	Ids     []DeleteRecord `json:"ids"`
 }
 
-func (repo SingleStoreRepository) DeleteById(id uint64) (int, error) {
+func (repo SingleStoreRepository) DeleteById(tokenid string, id uint64) (int, error) {
 	stmt, err := repo.db.PrepareContext(context.Background(), delete)
 
 	if err != nil {
@@ -330,7 +332,7 @@ func (repo SingleStoreRepository) DeleteById(id uint64) (int, error) {
 	return 0, errors.New("zero rows affected")
 }
 
-func (repo SingleStoreRepository) DeleteManyById(id []DeleteRecord) (rowsaffected int64, err error) {
+func (repo SingleStoreRepository) DeleteManyById(tokenid string, id []DeleteRecord) (rowsaffected int64, err error) {
 	ids := []string{}
 	for _, v := range id {
 		ids = append(ids, strconv.Itoa(int(v.Id)))
