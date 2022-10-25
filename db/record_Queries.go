@@ -196,7 +196,7 @@ func (repo SingleStoreRepository) Create(logrecord logs.LogRecord) (*logs.LogRec
 	return &logrecord, nil
 }
 
-func (repo SingleStoreRepository) Last15Minutes(tokenid string) (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) Last15Minutes(userid int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.PrepareContext(context.Background(), getLast15Minutes)
 	if err != nil {
 		return
@@ -204,7 +204,7 @@ func (repo SingleStoreRepository) Last15Minutes(tokenid string) (rcds []logs.Log
 	defer stmt.Close()
 	var records []logs.LogRecord
 
-	rows, err := stmt.QueryContext(context.Background())
+	rows, err := stmt.QueryContext(context.Background(), userid)
 	if err != nil {
 		return
 	}
@@ -227,7 +227,7 @@ func (repo SingleStoreRepository) Last15Minutes(tokenid string) (rcds []logs.Log
 	return records, nil
 }
 
-func (repo SingleStoreRepository) LastXMinutes(tokenid string, minutes int) (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) LastXMinutes(userid int, minutes int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.PrepareContext(context.Background(), getLastXMinutes)
 	if err != nil {
 		return
@@ -235,7 +235,7 @@ func (repo SingleStoreRepository) LastXMinutes(tokenid string, minutes int) (rcd
 	defer stmt.Close()
 	var records []logs.LogRecord
 
-	rows, err := stmt.QueryContext(context.Background(), minutes)
+	rows, err := stmt.QueryContext(context.Background(), userid, minutes)
 	if err != nil {
 		return
 	}

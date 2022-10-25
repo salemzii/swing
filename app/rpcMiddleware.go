@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
-	"time"
+	"os"
 
-	"github.com/salemzii/swing/service"
+	"github.com/golang-jwt/jwt"
 	"go.neonxp.dev/jsonrpc2/rpc"
 )
 
@@ -22,30 +23,40 @@ var (
 type TokenStruct struct {
 	Token json.RawMessage `json:"token"`
 }
+type ParamStruct struct {
+	Token   json.RawMessage `json:"token"`
+	UserId  json.RawMessage `json:"userid"`
+	Minutes json.RawMessage `json:"minutes"`
+}
 
 func TokenMiddleware(ctx context.Context) rpc.Middleware {
 	return func(handler rpc.RpcHandler) rpc.RpcHandler {
 		return func(ctx context.Context, req *rpc.RpcRequest) *rpc.RpcResponse {
 			resp := handler(ctx, req)
 			var tokenObj TokenStruct
-			//var details TokenDetails
+			var tokenSting string
 			if err := json.Unmarshal(req.Params, &tokenObj); err != nil {
 				return resp
 			}
-			log.Println(string(tokenObj.Token))
 
-			details, err := service.VerifyToken(string(tokenObj.Token))
+			tokenByte, err := tokenObj.Token.MarshalJSON()
 			if err != nil {
-				return &rpc.RpcResponse{Jsonrpc: "2.0", Result: json.RawMessage(err.Error()), Error: err}
+				log.Println(err)
+			}
+			if err = json.Unmarshal(tokenByte, &tokenSting); err != nil {
+				return resp
+			}
+			userid, username, err := ParseToken(tokenSting)
+			if err != nil {
+				return resp
 			}
 
-			if !details.Enabled {
-				return &rpc.RpcResponse{Jsonrpc: "2.0", Result: json.RawMessage(ErrTokenInActive.Error()), Error: ErrTokenInActive}
-			}
+			useridFloat64 := userid.(float64)
+			useridUint8 := uint8(useridFloat64)
 
-			if details.Expires_at.Before(time.Now()) {
-				return &rpc.RpcResponse{Jsonrpc: "2.0", Result: json.RawMessage(ErrTokenExpired.Error()), Error: ErrTokenExpired}
-			}
+			log.Println("values", username, byte(useridUint8))
+
+			req.Params = append(req.Params, byte(useridUint8))
 
 			return resp
 		}
@@ -53,16 +64,35 @@ func TokenMiddleware(ctx context.Context) rpc.Middleware {
 
 }
 
-func Decode(r io.Reader) (ts *TokenStruct, token string, err error) {
+func Decode(r io.Reader) (ts *TokenStruct, token []byte, err error) {
 
 	ts = new(TokenStruct)
 	if err = json.NewDecoder(r).Decode(ts); err != nil {
-		return &TokenStruct{}, "", err
+		log.Println(err)
+		return &TokenStruct{}, []byte(""), err
 	}
 	var tk string
 	if err = json.Unmarshal(ts.Token, &tk); err == nil {
-		return ts, tk, nil
+		return ts, []byte(tk), nil
 	}
-	return &TokenStruct{}, "", nil
+	return &TokenStruct{}, []byte(""), nil
 
+}
+
+func ParseToken(tokenString string) (interface{}, interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		secretKey := []byte(os.Getenv("JwtSecretKey"))
+		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
+		return secretKey, nil
+	})
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims["userid"], claims["user"], nil
+	} else {
+		return nil, nil, err
+	}
 }

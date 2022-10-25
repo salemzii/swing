@@ -8,4 +8,7 @@ require (
 	go.neonxp.dev/jsonrpc2 v1.2.0
 )
 
-require golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0 // indirect
+require (
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0 // indirect
+)

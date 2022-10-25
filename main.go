@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/salemzii/swing/app"
 	"github.com/salemzii/swing/service"
 	"go.neonxp.dev/jsonrpc2/rpc"
 	"go.neonxp.dev/jsonrpc2/transport"
@@ -13,10 +14,20 @@ import (
 
 func main() {
 
+	tk, err := service.GenerateJwt()
+	if err != nil {
+		log.Println(err)
+	}
+	username, userid, err := app.ParseToken(tk)
+	if err != nil {
+		log.Println("ERROR TOKEN", err)
+	}
+	log.Println(username, userid)
+
 	server := rpc.New(
 		rpc.WithLogger(rpc.StdLogger),
 		rpc.WithTransport(&transport.HTTP{Bind: ":8081"}),
-		//rpc.WithMiddleware(app.TokenMiddleware(context.Background())),
+		rpc.WithMiddleware(app.TokenMiddleware(context.Background())),
 	)
 
 	server.Register("rpc.hello", rpc.HS(Hello))

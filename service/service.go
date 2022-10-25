@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	jwt "github.com/golang-jwt/jwt"
 	"github.com/salemzii/swing/db"
 	"github.com/salemzii/swing/logs"
 	"github.com/salemzii/swing/users"
@@ -27,6 +29,7 @@ var (
 	ErrDeleteFailed    = errors.New("delete failed")
 
 	SwingRepository *db.SingleStoreRepository
+	JwtSecretKey    = []byte(os.Getenv("JwtSecretKey"))
 )
 
 func init() {
@@ -74,8 +77,8 @@ type Record struct {
 }
 
 type XRecords struct {
-	Tokenid string `json:"tokenid"`
-	Minutes int    `json:"minutes"`
+	Userid  int `json:"userid"`
+	Minutes int `json:"minutes"`
 }
 
 func CreateRecord(ctx context.Context, arg *logs.LogRecord) (*logs.LogRecord, error) {
@@ -137,7 +140,8 @@ func AllRecords(ctx context.Context, arg *AllRecordStruct) (rcds []logs.LogRecor
 }
 
 func GetLast15MinutesRecords(ctx context.Context, arg *XRecords) (rcd []logs.LogRecord, err error) {
-	records, err := SwingRepository.Last15Minutes(arg.Tokenid)
+	log.Println("The id", &arg.Userid, arg.Minutes)
+	records, err := SwingRepository.Last15Minutes(arg.Userid)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
@@ -147,7 +151,7 @@ func GetLast15MinutesRecords(ctx context.Context, arg *XRecords) (rcd []logs.Log
 
 func GetLastXMinutesRecords(ctx context.Context, arg *XRecords) (rcd []logs.LogRecord, err error) {
 
-	records, err := SwingRepository.LastXMinutes(arg.Tokenid, arg.Minutes)
+	records, err := SwingRepository.LastXMinutes(arg.Userid, arg.Minutes)
 	if err != nil {
 		log.Println("ERROR", err)
 		return []logs.LogRecord{}, err
@@ -206,4 +210,23 @@ func VerifyToken(token string) (users.TokenDetails, error) {
 		return users.TokenDetails{}, err
 	}
 	return details, nil
+}
+
+func GenerateJwt() (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	claims := token.Claims.(jwt.MapClaims)
+	claims["exp"] = time.Now().Add(10 * time.Hour).Unix()
+	claims["authorized"] = true
+	claims["user"] = "username"
+	claims["userid"] = 100
+
+	tokenString, err := token.SignedString(JwtSecretKey)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+
+	log.Println(tokenString)
+	return tokenString, nil
 }
