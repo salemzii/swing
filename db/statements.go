@@ -28,31 +28,27 @@ const (
 		userid
 	)	VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
-	insertMany       = "INSERT INTO records (message, level, stacktrace, function, linenumber, process, timestamp, logger, userid)	VALUES "
-	getLast15Minutes = `SELECT * FROM records WHERE userid=? AND  created  > DATE_SUB(NOW(), INTERVAL 15 MINUTE) ORDER BY created 
-	RETURNING id, level, message, stacktrace, function, linenumber, process, timestamp, created, logger, userid;`
+	insertMany       = `INSERT INTO records (message, level, stacktrace, function, linenumber, process, timestamp, logger, userid)	VALUES `
+	getLast15Minutes = `SELECT * FROM records WHERE userid=? AND created  > DATE_SUB(NOW(), INTERVAL 15 MINUTE) ORDER BY created;`
 
-	getLastXMinutes = `SELECT * FROM records WHERE created  > DATE_SUB(NOW(), INTERVAL ? MINUTE);`
+	getLastXMinutes = `SELECT * FROM records WHERE userid=? AND created  > DATE_SUB(NOW(), INTERVAL ? MINUTE) ORDER BY created;`
 
-	all = `SELECT * FROM records WHERE userid=? ORDER BY created 
-		RETURNING id, level, message, stacktrace, function, linenumber, process, timestamp, created, logger, userid;`
+	all = `SELECT * FROM records WHERE userid=? ORDER BY created;`
+
 	getByFunction = `SELECT * 
 	FROM records 
 	WHERE userid=? AND function=? 
-	ORDER BY created
-	RETURNING id, level, message, stacktrace, function, linenumber, process, timestamp, created, logger, userid; 
+	ORDER BY created; 
 	`
 	getByLevel = `SELECT * 
 	FROM records
 	WHERE userid=? AND level=?
-	ORDER BY created
-	RETURNING id, level, message, stacktrace, function, linenumber, process, timestamp, created, logger, userid;
+	ORDER BY created;
 	`
 	getByLineNum = `SELECT * 
 	FROM records 
 	WHERE userid=? AND linenumber=? 
-	ORDER BY created
-	RETURNING id, level, message, stacktrace, function, linenumber, process, timestamp, created, logger, userid;
+	ORDER BY created;
 	`
 	delete     = `DELETE FROM records WHERE userid=? AND id=?;`
 	deleteMany = `DELETE FROM records WHERE userid=? AND id IN `

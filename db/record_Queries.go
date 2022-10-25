@@ -264,7 +264,7 @@ func (repo SingleStoreRepository) CreateMany(logrecords []logs.LogRecord) (uint,
 	var params []interface{}
 
 	for _, v := range logrecords {
-		inserts = append(inserts, "(?, ?, ?, ?, ?, ?, ?, ?)")
+		inserts = append(inserts, "(?, ?, ?, ?, ?, ?, ?, ?, ?)")
 		params = append(params, v.Message, v.Level, v.StackTrace, v.Function, v.LineNumber, v.Process, v.TimeStamp, v.Logger, v.UserId)
 	}
 	queryVals := strings.Join(inserts, ",")
