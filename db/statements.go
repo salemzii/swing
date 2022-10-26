@@ -29,23 +29,35 @@ const (
 	)	VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
 	insertMany       = `INSERT INTO records (message, level, stacktrace, function, linenumber, process, timestamp, logger, userid)	VALUES `
-	getLast15Minutes = `SELECT * FROM records WHERE userid=? AND created  > DATE_SUB(NOW(), INTERVAL 15 MINUTE) ORDER BY created;`
+	getLast15Minutes = `SELECT 
+	id, level, message, stacktrace, function,linenumber, process, timestamp, created, logger, userid
+	FROM records WHERE userid=? AND created  > DATE_SUB(NOW(), INTERVAL 15 MINUTE) 
+	ORDER BY created;`
 
-	getLastXMinutes = `SELECT * FROM records WHERE userid=? AND created  > DATE_SUB(NOW(), INTERVAL ? MINUTE) ORDER BY created;`
+	getLastXMinutes = `SELECT 
+	id, level, message, stacktrace, function,linenumber, process, timestamp, created, logger, userid
+	FROM records WHERE userid=? AND created  > DATE_SUB(NOW(), INTERVAL ? MINUTE) 
+	ORDER BY created;`
 
-	all = `SELECT * FROM records WHERE userid=? ORDER BY created;`
+	all = `SELECT 
+	id, level, message, stacktrace, function,linenumber, process, timestamp, created, logger, userid
+	FROM records WHERE userid=? 
+	ORDER BY created;`
 
-	getByFunction = `SELECT * 
+	getByFunction = `SELECT 
+	id, level, message, stacktrace, function,linenumber, process, timestamp, created, logger, userid
 	FROM records 
 	WHERE userid=? AND function=? 
 	ORDER BY created; 
 	`
-	getByLevel = `SELECT * 
+	getByLevel = `SELECT 
+	id, level, message, stacktrace, function,linenumber, process, timestamp, created, logger, userid
 	FROM records
 	WHERE userid=? AND level=?
 	ORDER BY created;
 	`
-	getByLineNum = `SELECT * 
+	getByLineNum = `SELECT 
+	id, level, message, stacktrace, function,linenumber, process, timestamp, created, logger, userid
 	FROM records 
 	WHERE userid=? AND linenumber=? 
 	ORDER BY created;
@@ -67,7 +79,7 @@ const (
 	) VALUES (?, ?, ?);`
 
 	allUsers          = `SELECT * FROM users ORDER BY created;`
-	getUserByEmail    = `SELECT FROM users WHERE email=?;`
+	getUserByEmail    = `SELECT id, email, password, username FROM users WHERE email=?;`
 	getUserByUsername = `SELECT * FROM users WHERE username=?;`
 
 	migrateToken = `CREATE TABLE IF NOT EXISTS tokens (
@@ -79,6 +91,13 @@ const (
 		userid INT NOT NULL,
 		created TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP
 	);`
-	getToken         = "SELECT * FROM tokens WHERE token = ?;"
+	createToken = `INSERT INTO tokens (
+		token,
+		expires,
+		rate, 
+		enabled, 
+		userid
+	) VALUES(?, ?, ?, ?, ?)`
+	getToken         = `SELECT * FROM tokens WHERE token = ?;`
 	getTokenByUserId = `SELECT * FROM tokens WHERE userid=? RETURNING token;`
 )

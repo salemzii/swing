@@ -11,7 +11,7 @@ import (
 	"github.com/salemzii/swing/logs"
 )
 
-func (repo SingleStoreRepository) GetByFunction(name string, tokenid string, limit ...int) (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) GetByFunction(name string, userid int, limit ...int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.Prepare(getByFunction)
 	if err != nil {
 		return
@@ -20,7 +20,7 @@ func (repo SingleStoreRepository) GetByFunction(name string, tokenid string, lim
 
 	var records []logs.LogRecord
 
-	rows, err := stmt.Query(name)
+	rows, err := stmt.Query(userid, name)
 	if err != nil {
 		return
 	}
@@ -44,7 +44,7 @@ func (repo SingleStoreRepository) GetByFunction(name string, tokenid string, lim
 	return records, nil
 }
 
-func (repo SingleStoreRepository) GetByLevel(level string, tokenid string, limit ...int) (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) GetByLevel(level string, userid int, limit ...int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.Prepare(getByLevel)
 	if err != nil {
 		return
@@ -53,7 +53,7 @@ func (repo SingleStoreRepository) GetByLevel(level string, tokenid string, limit
 
 	var records []logs.LogRecord
 
-	rows, err := stmt.Query(level)
+	rows, err := stmt.Query(userid, level)
 	if err != nil {
 		return
 	}
@@ -77,7 +77,7 @@ func (repo SingleStoreRepository) GetByLevel(level string, tokenid string, limit
 	return records, nil
 }
 
-func (repo SingleStoreRepository) GetByLineNum(line int, tokenid string, limit ...int) (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) GetByLineNum(line int, userid int, limit ...int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.PrepareContext(context.Background(), getByLineNum)
 	if err != nil {
 		return
@@ -85,7 +85,7 @@ func (repo SingleStoreRepository) GetByLineNum(line int, tokenid string, limit .
 	defer stmt.Close()
 
 	var records []logs.LogRecord
-	rows, err := stmt.QueryContext(context.Background(), line)
+	rows, err := stmt.QueryContext(context.Background(), userid, line)
 	if err != nil {
 		return
 	}
@@ -109,7 +109,7 @@ func (repo SingleStoreRepository) GetByLineNum(line int, tokenid string, limit .
 	return records, nil
 }
 
-func (repo SingleStoreRepository) GetByOffset(offset int, tokenid string, limit ...int) (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) GetByOffset(offset int, userid int, limit ...int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.Prepare(getByLineNum)
 	if err != nil {
 		return
@@ -118,7 +118,7 @@ func (repo SingleStoreRepository) GetByOffset(offset int, tokenid string, limit 
 
 	var records []logs.LogRecord
 
-	rows, err := stmt.Query(offset)
+	rows, err := stmt.Query(userid, offset)
 	if err != nil {
 		return
 	}
@@ -143,7 +143,7 @@ func (repo SingleStoreRepository) GetByOffset(offset int, tokenid string, limit 
 
 }
 
-func (repo SingleStoreRepository) All(tokenid string, limit ...int) (rcds []logs.LogRecord, err error) {
+func (repo SingleStoreRepository) All(userid int, limit ...int) (rcds []logs.LogRecord, err error) {
 	stmt, err := repo.db.PrepareContext(context.Background(), all)
 	if err != nil {
 		return
@@ -151,7 +151,7 @@ func (repo SingleStoreRepository) All(tokenid string, limit ...int) (rcds []logs
 	defer stmt.Close()
 	var records []logs.LogRecord
 
-	rows, err := stmt.QueryContext(context.Background())
+	rows, err := stmt.QueryContext(context.Background(), userid)
 	if err != nil {
 		return
 	}
@@ -307,7 +307,7 @@ type DeleteRecords struct {
 	Ids     []DeleteRecord `json:"ids"`
 }
 
-func (repo SingleStoreRepository) DeleteById(tokenid string, id uint64) (int, error) {
+func (repo SingleStoreRepository) DeleteById(userid int, id uint64) (int, error) {
 	stmt, err := repo.db.PrepareContext(context.Background(), delete)
 
 	if err != nil {
@@ -316,7 +316,7 @@ func (repo SingleStoreRepository) DeleteById(tokenid string, id uint64) (int, er
 	}
 	defer stmt.Close()
 
-	res, err := stmt.ExecContext(context.Background(), id)
+	res, err := stmt.ExecContext(context.Background(), userid, id)
 	if err != nil {
 		log.Printf("Error %s when Querying SQL ", err)
 		return 0, err
@@ -332,7 +332,7 @@ func (repo SingleStoreRepository) DeleteById(tokenid string, id uint64) (int, er
 	return 0, errors.New("zero rows affected")
 }
 
-func (repo SingleStoreRepository) DeleteManyById(tokenid string, id []DeleteRecord) (rowsaffected int64, err error) {
+func (repo SingleStoreRepository) DeleteManyById(userid int, id []DeleteRecord) (rowsaffected int64, err error) {
 	ids := []string{}
 	for _, v := range id {
 		ids = append(ids, strconv.Itoa(int(v.Id)))
@@ -351,7 +351,7 @@ func (repo SingleStoreRepository) DeleteManyById(tokenid string, id []DeleteReco
 	}
 	defer stmt.Close()
 
-	res, err := stmt.ExecContext(context.Background())
+	res, err := stmt.ExecContext(context.Background(), userid)
 	if err != nil {
 		log.Printf("Error %s when Querying SQL ", err)
 		return 0, err

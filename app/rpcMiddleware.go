@@ -23,16 +23,22 @@ var (
 type TokenStruct struct {
 	Token json.RawMessage `json:"token"`
 }
-type ParamStruct struct {
-	Token   json.RawMessage `json:"token"`
-	UserId  json.RawMessage `json:"userid"`
-	Minutes json.RawMessage `json:"minutes"`
-}
 
 func TokenMiddleware(ctx context.Context) rpc.Middleware {
 	return func(handler rpc.RpcHandler) rpc.RpcHandler {
 		return func(ctx context.Context, req *rpc.RpcRequest) *rpc.RpcResponse {
+
 			resp := handler(ctx, req)
+
+			switch req.Method {
+			case "hello":
+				return resp
+			case "users.login":
+				return resp
+			case "users.create":
+				return resp
+			}
+
 			var tokenObj TokenStruct
 			var tokenSting string
 			if err := json.Unmarshal(req.Params, &tokenObj); err != nil {
@@ -46,17 +52,18 @@ func TokenMiddleware(ctx context.Context) rpc.Middleware {
 			if err = json.Unmarshal(tokenByte, &tokenSting); err != nil {
 				return resp
 			}
-			userid, username, err := ParseToken(tokenSting)
+
+			valid, userid, username, err := ParseToken(tokenSting)
 			if err != nil {
+				if !valid {
+					return rpc.ErrorResponse(-32000, ErrTokenInValid)
+				}
 				return resp
 			}
 
-			useridFloat64 := userid.(float64)
-			useridUint8 := uint8(useridFloat64)
-
-			log.Println("values", username, byte(useridUint8))
-
-			req.Params = append(req.Params, byte(useridUint8))
+			if userid == nil || username == nil {
+				return resp
+			}
 
 			return resp
 		}
@@ -79,20 +86,38 @@ func Decode(r io.Reader) (ts *TokenStruct, token []byte, err error) {
 
 }
 
-func ParseToken(tokenString string) (interface{}, interface{}, error) {
+func ParseToken(tokenString string) (bool, interface{}, interface{}, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		secretKey := []byte(os.Getenv("JwtSecretKey"))
-		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
 		return secretKey, nil
 	})
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return claims["userid"], claims["user"], nil
+		return token.Valid, claims["userid"], claims["user"], nil
 	} else {
-		return nil, nil, err
+		return token.Valid, nil, nil, err
+	}
+}
+
+func ServiceParseToken(tokenString string) (bool, int, interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		secretKey := []byte(os.Getenv("JwtSecretKey"))
+		return secretKey, nil
+	})
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userid := claims["userid"].(float64)
+
+		return token.Valid, int(userid), claims["user"], nil
+	} else {
+		return token.Valid, 0, nil, err
 	}
 }

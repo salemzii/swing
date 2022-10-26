@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/salemzii/swing/users"
 )
@@ -19,7 +20,7 @@ type CreateUser struct {
 }
 
 func (repo SingleStoreRepository) CreateUser(user users.User) (*users.User, error) {
-	res, err := repo.db.Exec(createUser, user.Email, user.Username, user.Password)
+	res, err := repo.db.Exec(createUser, user.Username, user.Email, user.Password)
 
 	if err != nil {
 		return nil, err
@@ -35,38 +36,24 @@ func (repo SingleStoreRepository) CreateUser(user users.User) (*users.User, erro
 	return &user, nil
 }
 
-func (repo SingleStoreRepository) LoginUser(logins users.LoginUser) (*users.User, string, error) {
+func (repo SingleStoreRepository) LoginUser(logins users.LoginUser) (*users.User, error) {
 	stmt, err := repo.db.Prepare(getUserByEmail)
 	if err != nil {
-		return &users.User{}, "", nil
+		return &users.User{}, nil
 	}
 
 	defer stmt.Close()
 	var user users.User
-	var usertoken users.TokenDetails
 
 	row := stmt.QueryRowContext(context.Background(), logins.Email)
-	err = row.Scan(&user.Id, &user.Email, &user.Password)
+	err = row.Scan(&user.Id, &user.Email, &user.Password, &user.Username)
 	if err != nil {
-		return &users.User{}, "", err
+		return &users.User{}, err
 	}
 
 	if user.Password != logins.Password {
-		return &users.User{}, "", ErrIncorrectPassword
+		return &users.User{}, ErrIncorrectPassword
 	}
-
-	tokenStmt, err := repo.db.PrepareContext(context.Background(), getTokenByUserId)
-	if err != nil {
-		return &users.User{}, "", nil
-	}
-
-	defer tokenStmt.Close()
-	tokenrow := tokenStmt.QueryRowContext(context.Background(), user.Id)
-
-	err = tokenrow.Scan(&usertoken.Id, &usertoken.Token, &usertoken.Expires_at, &usertoken.Rate_limit, &usertoken.Enabled, &usertoken.UserId)
-	if err != nil {
-		return &users.User{}, "", err
-	}
-
-	return &users.User{}, "", nil
+	log.Println(user)
+	return &user, nil
 }
