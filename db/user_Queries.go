@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"log"
 
@@ -48,6 +49,10 @@ func (repo SingleStoreRepository) LoginUser(logins users.LoginUser) (*users.User
 	row := stmt.QueryRowContext(context.Background(), logins.Email)
 	err = row.Scan(&user.Id, &user.Email, &user.Password, &user.Username)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+
+			return &users.User{}, ErrUserNotFound
+		}
 		return &users.User{}, err
 	}
 
