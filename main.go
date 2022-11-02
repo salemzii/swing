@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -13,10 +14,10 @@ import (
 )
 
 func main() {
-
+	port := os.Getenv("PORT")
 	server := rpc.New(
 		rpc.WithLogger(rpc.StdLogger),
-		rpc.WithTransport(&transport.HTTP{Bind: ":8081"}),
+		rpc.WithTransport(&transport.HTTP{Bind: fmt.Sprintf(":%s", port)}),
 		rpc.WithMiddleware(app.TokenMiddleware(context.Background())),
 	)
 

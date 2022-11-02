@@ -296,6 +296,8 @@ func LoginUserAccount(ctx context.Context, arg *users.LoginUser) (*LoginResponse
 	return &resp, nil
 }
 
+func Details(ctx context.Context, arg *AllRecordStruct) {}
+
 func VerifyToken(token string) (users.TokenDetails, error) {
 	details, err := SwingRepository.FetchToken(token)
 	if err != nil {
