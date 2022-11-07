@@ -32,35 +32,35 @@ const (
 	getLast15Minutes = `SELECT 
 	id, level, message, stacktrace, function,linenumber, process, timestamp, created, logger, userid
 	FROM records WHERE userid=? AND created  > DATE_SUB(NOW(), INTERVAL 15 MINUTE) 
-	ORDER BY created;`
+	LIMIT 500;`
 
 	getLastXMinutes = `SELECT 
 	id, level, message, stacktrace, function,linenumber, process, timestamp, created, logger, userid
 	FROM records WHERE userid=? AND created  > DATE_SUB(NOW(), INTERVAL ? MINUTE) 
-	ORDER BY created;`
+	LIMIT 500;`
 
 	all = `SELECT 
 	id, level, message, stacktrace, function,linenumber, process, timestamp, created, logger, userid
 	FROM records WHERE userid=? 
-	ORDER BY created;`
+	LIMIT 500;`
 
 	getByFunction = `SELECT 
 	id, level, message, stacktrace, function,linenumber, process, timestamp, created, logger, userid
 	FROM records 
 	WHERE userid=? AND function=? 
-	ORDER BY created; 
+	LIMIT 500; 
 	`
 	getByLevel = `SELECT 
 	id, level, message, stacktrace, function,linenumber, process, timestamp, created, logger, userid
 	FROM records
 	WHERE userid=? AND level=?
-	ORDER BY created;
+	LIMIT 500;
 	`
 	getByLineNum = `SELECT 
 	id, level, message, stacktrace, function,linenumber, process, timestamp, created, logger, userid
 	FROM records 
 	WHERE userid=? AND linenumber=? 
-	ORDER BY created;
+	LIMIT 500;
 	`
 	delete     = `DELETE FROM records WHERE userid=? AND id=?;`
 	deleteMany = `DELETE FROM records WHERE userid=? AND id IN `
